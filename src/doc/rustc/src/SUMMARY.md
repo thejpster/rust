@@ -97,6 +97,7 @@
     - [powerpc-unknown-openbsd](platform-support/powerpc-unknown-openbsd.md)
     - [powerpc-unknown-linux-gnuspe](platform-support/powerpc-unknown-linux-gnuspe.md)
     - [powerpc-unknown-linux-muslspe](platform-support/powerpc-unknown-linux-muslspe.md)
+    - [powerpc-unknown-none](platform-support/powerpc-unknown-none.md)
     - [powerpc64-ibm-aix](platform-support/aix.md)
     - [powerpc64-unknown-linux-musl](platform-support/powerpc64-unknown-linux-musl.md)
     - [powerpc64le-unknown-linux-gnu](platform-support/powerpc64le-unknown-linux-gnu.md)

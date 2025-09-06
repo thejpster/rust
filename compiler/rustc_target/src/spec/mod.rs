@@ -2157,6 +2157,7 @@ supported_targets! {
     ("riscv64a23-unknown-linux-gnu", riscv64a23_unknown_linux_gnu),
 
     ("sparc-unknown-none-elf", sparc_unknown_none_elf),
+    ("powerpc-unknown-none-eabi", powerpc_unknown_none_eabi),
 
     ("loongarch32-unknown-none", loongarch32_unknown_none),
     ("loongarch32-unknown-none-softfloat", loongarch32_unknown_none_softfloat),
