@@ -1,6 +1,6 @@
 # `armv8r-none-eabihf`
 
-**Tier: 3**
+**Tier: 2**
 
 Bare-metal target for CPUs in the Armv8-R architecture family, supporting
 dual ARM/Thumb mode, with ARM mode as the default.
