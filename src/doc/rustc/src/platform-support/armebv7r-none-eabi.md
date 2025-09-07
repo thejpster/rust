@@ -1,6 +1,6 @@
 # `armebv7r-none-eabi` and `armebv7r-none-eabihf`
 
-**Tier: 2**
+**Tier: 3**
 
 Bare-metal target for CPUs in the Armv7-R architecture family running in Big
 Endian mode. These processors support dual ARM/Thumb mode, with ARM mode as
