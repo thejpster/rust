@@ -57,7 +57,7 @@
       - [armv5te-none-eabi](platform-support/armv5te-none-eabi.md)
       - [armv7a-none-eabi{,hf}](platform-support/armv7a-none-eabi.md)
       - [armv7r-none-eabi{,hf}](platform-support/armv7r-none-eabi.md)
-      - [armveb7r-none-eabi{,hf}](platform-support/armebv7r-none-eabi.md)
+      - [armebv7r-none-eabi{,hf}](platform-support/armebv7r-none-eabi.md)
       - [armv8r-none-eabihf](platform-support/armv8r-none-eabihf.md)
       - [thumbv6m-none-eabi](./platform-support/thumbv6m-none-eabi.md)
       - [thumbv7em-none-eabi\*](./platform-support/thumbv7em-none-eabi.md)
