@@ -444,3 +444,17 @@ For targets: `s390x-unknown-linux-gnu`
 - C compiler > gcc version = 8.5.0
 - C compiler > gcc extra config = --with-arch=z10 -- LLVM's minimum support
 - C compiler > C++ = ENABLE -- to cross compile LLVM
+
+### `sparc64-linux-gnu.defconfig`
+
+For targets: `sparc64-unknown-linux-gnu`
+
+- Path and misc options > Prefix directory = /x-tools/${CT\_TARGET}
+- Path and misc options > Use a mirror = ENABLE
+- Path and misc options > Base URL = https://ci-mirrors.rust-lang.org/rustc
+- Target options > Target Architecture = sparc
+- Target options > Bitness = 64-bit
+- Operating System > Target OS = linux
+- Operating System > Linux kernel version = 5.4.289
+- C-library > glibc version = 2.32 -- first glibc with systemd support
+- C compiler > C++ = ENABLE -- to cross compile LLVM
