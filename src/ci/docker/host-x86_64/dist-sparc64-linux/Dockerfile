@@ -16,14 +16,6 @@ RUN /scripts/crosstool-ng-build.sh
 
 ENV PATH=$PATH:/x-tools/sparc64-unknown-linux-gnu/bin
 
-# openssl-src-rs doesn't know what sparc64-linux is.
-# Once https://github.com/alexcrichton/openssl-src-rs/pull/271 is merged, released, and openssl-sys is updated,
-# we can stop building OpenSSL the hard way.
-COPY scripts/openssl.sh /scripts/
-RUN /scripts/openssl.sh openssl-3.5.0 linux64-sparcv9 --cross-compile-prefix=/x-tools/sparc64-unknown-linux-gnu/bin/sparc64-unknown-linux-gnu-
-ENV SPARC64_UNKNOWN_LINUX_GNU_OPENSSL_NO_VENDOR=y
-ENV SPARC64_UNKNOWN_LINUX_GNU_OPENSSL_DIR="/openssl"
-
 COPY scripts/sccache.sh /scripts/
 RUN sh /scripts/sccache.sh
 
