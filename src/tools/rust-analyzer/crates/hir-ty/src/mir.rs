@@ -134,29 +134,30 @@ impl<'db> Operand<'db> {
         func_id: hir_def::FunctionId,
         generic_args: GenericArgs<'db>,
     ) -> Operand<'db> {
-        let interner = DbInterner::new_with(db, None, None);
+        let interner = DbInterner::new_no_crate(db);
         let ty = Ty::new_fn_def(interner, CallableDefId::FunctionId(func_id).into(), generic_args);
         Operand::from_bytes(Box::default(), ty)
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ProjectionElem<V, T> {
+#[derive(Debug, Clone, PartialEq, Eq, Hash, salsa::Update)]
+pub enum ProjectionElem<'db, V: PartialEq> {
     Deref,
     Field(Either<FieldId, TupleFieldId>),
     // FIXME: get rid of this, and use FieldId for tuples and closures
     ClosureField(usize),
-    Index(V),
+    Index(#[update(unsafe(with(crate::utils::unsafe_update_eq)))] V),
     ConstantIndex { offset: u64, from_end: bool },
     Subslice { from: u64, to: u64 },
     //Downcast(Option<Symbol>, VariantIdx),
-    OpaqueCast(T),
+    OpaqueCast(Ty<'db>),
 }
 
-impl<V, T> ProjectionElem<V, T> {
-    pub fn projected_ty<'db>(
+impl<'db, V: PartialEq> ProjectionElem<'db, V> {
+    pub fn projected_ty(
         &self,
         infcx: &InferCtxt<'db>,
+        env: ParamEnv<'db>,
         mut base: Ty<'db>,
         closure_field: impl FnOnce(InternedClosureId, GenericArgs<'db>, usize) -> Ty<'db>,
         krate: Crate,
@@ -173,8 +174,6 @@ impl<V, T> ProjectionElem<V, T> {
 
         if matches!(base.kind(), TyKind::Alias(..)) {
             let mut ocx = ObligationCtxt::new(infcx);
-            // FIXME: we should get this from caller
-            let env = ParamEnv::empty();
             match ocx.structurally_normalize_ty(&ObligationCause::dummy(), env, base) {
                 Ok(it) => base = it,
                 Err(_) => return Ty::new_error(interner, ErrorGuaranteed),
@@ -254,7 +253,7 @@ impl<V, T> ProjectionElem<V, T> {
     }
 }
 
-type PlaceElem<'db> = ProjectionElem<LocalId<'db>, Ty<'db>>;
+type PlaceElem<'db> = ProjectionElem<'db, LocalId<'db>>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ProjectionId(u32);
@@ -977,15 +976,13 @@ pub enum Rvalue<'db> {
     UnaryOp(UnOp, Operand<'db>),
 
     /// Computes the discriminant of the place, returning it as an integer of type
-    /// [`discriminant_ty`]. Returns zero for types without discriminant.
+    /// `discriminant_ty`. Returns zero for types without discriminant.
     ///
     /// The validity requirements for the underlying value are undecided for this rvalue, see
     /// [#91095]. Note too that the value of the discriminant is not the same thing as the
-    /// variant index; use [`discriminant_for_variant`] to convert.
+    /// variant index; use `discriminant_for_variant` to convert.
     ///
-    /// [`discriminant_ty`]: crate::ty::Ty::discriminant_ty
     /// [#91095]: https://github.com/rust-lang/rust/issues/91095
-    /// [`discriminant_for_variant`]: crate::ty::Ty::discriminant_for_variant
     Discriminant(Place<'db>),
 
     /// Creates an aggregate value, like a tuple or struct.

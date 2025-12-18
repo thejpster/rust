@@ -210,7 +210,7 @@ pub(crate) fn is_ci_llvm_available_for_target(
         ("i686-unknown-linux-gnu", false),
         ("x86_64-unknown-linux-gnu", true),
         ("x86_64-apple-darwin", true),
-        ("x86_64-pc-windows-gnu", true),
+        ("x86_64-pc-windows-gnu", false),
         ("x86_64-pc-windows-msvc", true),
         // tier 2 with host tools
         ("aarch64-unknown-linux-musl", false),
@@ -227,7 +227,7 @@ pub(crate) fn is_ci_llvm_available_for_target(
         ("powerpc64le-unknown-linux-musl", false),
         ("riscv64gc-unknown-linux-gnu", false),
         ("s390x-unknown-linux-gnu", false),
-        ("x86_64-pc-windows-gnullvm", true),
+        ("x86_64-pc-windows-gnullvm", false),
         ("x86_64-unknown-freebsd", false),
         ("x86_64-unknown-illumos", false),
         ("x86_64-unknown-linux-musl", false),
@@ -284,8 +284,7 @@ impl Step for Llvm {
             LlvmBuildStatus::ShouldBuild(m) => m,
         };
 
-        if builder.llvm_link_shared() && target.is_windows() && !target.ends_with("windows-gnullvm")
-        {
+        if builder.llvm_link_shared() && target.is_windows() && !target.is_windows_gnullvm() {
             panic!("shared linking to LLVM is not currently supported on {}", target.triple);
         }
 
@@ -926,7 +925,7 @@ impl Step for Enzyme {
         }
         let target = self.target;
 
-        let LlvmResult { host_llvm_config, .. } = builder.ensure(Llvm { target: self.target });
+        let LlvmResult { host_llvm_config, llvm_cmake_dir } = builder.ensure(Llvm { target });
 
         static STAMP_HASH_MEMO: OnceLock<String> = OnceLock::new();
         let smart_stamp_hash = STAMP_HASH_MEMO.get_or_init(|| {
@@ -956,15 +955,20 @@ impl Step for Enzyme {
             return out_dir;
         }
 
+        if !builder.config.dry_run() && !llvm_cmake_dir.is_dir() {
+            builder.info(&format!(
+                "WARNING: {} does not exist, Enzyme build will likely fail",
+                llvm_cmake_dir.display()
+            ));
+        }
+
         trace!(?target, "(re)building enzyme artifacts");
         builder.info(&format!("Building Enzyme for {target}"));
         t!(stamp.remove());
         let _time = helpers::timeit(builder);
         t!(fs::create_dir_all(&out_dir));
 
-        builder
-            .config
-            .update_submodule(Path::new("src").join("tools").join("enzyme").to_str().unwrap());
+        builder.config.update_submodule("src/tools/enzyme");
         let mut cfg = cmake::Config::new(builder.src.join("src/tools/enzyme/enzyme/"));
         configure_cmake(builder, target, &mut cfg, true, LdFlags::default(), &[]);
 
@@ -984,7 +988,7 @@ impl Step for Enzyme {
             .define("LLVM_ENABLE_ASSERTIONS", "ON")
             .define("ENZYME_EXTERNAL_SHARED_LIB", "ON")
             .define("ENZYME_BC_LOADER", "OFF")
-            .define("LLVM_DIR", builder.llvm_out(target));
+            .define("LLVM_DIR", llvm_cmake_dir);
 
         cfg.build();
 

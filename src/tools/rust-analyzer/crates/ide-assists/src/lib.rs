@@ -59,6 +59,8 @@
 //! <https://rust-analyzer.github.io/blog/2020/09/28/how-to-make-a-light-bulb.html>
 
 #![cfg_attr(feature = "in-rust-tree", feature(rustc_private))]
+// It's useful to refer to code that is private in doc comments.
+#![allow(rustdoc::private_intra_doc_links)]
 
 mod assist_config;
 mod assist_context;
@@ -67,8 +69,8 @@ mod tests;
 pub mod utils;
 
 use hir::Semantics;
-use ide_db::{EditionedFileId, RootDatabase};
-use syntax::{Edition, TextRange};
+use ide_db::RootDatabase;
+use syntax::TextRange;
 
 pub(crate) use crate::assist_context::{AssistContext, Assists};
 
@@ -88,9 +90,7 @@ pub fn assists(
     range: ide_db::FileRange,
 ) -> Vec<Assist> {
     let sema = Semantics::new(db);
-    let file_id = sema
-        .attach_first_edition(range.file_id)
-        .unwrap_or_else(|| EditionedFileId::new(db, range.file_id, Edition::CURRENT));
+    let file_id = sema.attach_first_edition(range.file_id);
     let ctx = AssistContext::new(sema, config, hir::FileRange { file_id, range: range.range });
     let mut acc = Assists::new(&ctx, resolve);
     handlers::all().iter().for_each(|handler| {
@@ -247,7 +247,6 @@ mod handlers {
             add_label_to_loop::add_label_to_loop,
             add_lifetime_to_type::add_lifetime_to_type,
             add_missing_match_arms::add_missing_match_arms,
-            add_return_type::add_return_type,
             add_turbo_fish::add_turbo_fish,
             apply_demorgan::apply_demorgan_iterator,
             apply_demorgan::apply_demorgan,
@@ -392,6 +391,7 @@ mod handlers {
             // used as a tie-breaker.
             add_missing_impl_members::add_missing_impl_members,
             add_missing_impl_members::add_missing_default_members,
+            add_return_type::add_return_type,
             //
             replace_string_with_char::replace_string_with_char,
             replace_string_with_char::replace_char_with_string,

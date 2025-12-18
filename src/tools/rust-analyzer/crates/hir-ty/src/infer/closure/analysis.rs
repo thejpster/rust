@@ -31,10 +31,10 @@ use crate::{
 
 // The below functions handle capture and closure kind (Fn, FnMut, ..)
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, salsa::Update)]
 pub(crate) struct HirPlace<'db> {
     pub(crate) local: BindingId,
-    pub(crate) projections: Vec<ProjectionElem<Infallible, Ty<'db>>>,
+    pub(crate) projections: Vec<ProjectionElem<'db, Infallible>>,
 }
 
 impl<'db> HirPlace<'db> {
@@ -43,11 +43,12 @@ impl<'db> HirPlace<'db> {
         for p in &self.projections {
             ty = p.projected_ty(
                 &ctx.table.infer_ctxt,
+                ctx.table.param_env,
                 ty,
                 |_, _, _| {
                     unreachable!("Closure field only happens in MIR");
                 },
-                ctx.owner.module(ctx.db).krate(),
+                ctx.owner.module(ctx.db).krate(ctx.db),
             );
         }
         ty
@@ -76,7 +77,7 @@ pub enum CaptureKind {
     ByValue,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, salsa::Update)]
 pub struct CapturedItem<'db> {
     pub(crate) place: HirPlace<'db>,
     pub(crate) kind: CaptureKind,
@@ -87,6 +88,7 @@ pub struct CapturedItem<'db> {
     /// copy all captures of the inner closure to the outer closure, and then we may
     /// truncate them, and we want the correct span to be reported.
     span_stacks: SmallVec<[SmallVec<[MirSpan; 3]>; 3]>,
+    #[update(unsafe(with(crate::utils::unsafe_update_eq)))]
     pub(crate) ty: EarlyBinder<'db, Ty<'db>>,
 }
 
@@ -101,7 +103,7 @@ impl<'db> CapturedItem<'db> {
     }
 
     pub fn ty(&self, db: &'db dyn HirDatabase, subst: GenericArgs<'db>) -> Ty<'db> {
-        let interner = DbInterner::new_with(db, None, None);
+        let interner = DbInterner::new_no_crate(db);
         self.ty.instantiate(interner, subst.split_closure_args_untupled().parent_args)
     }
 
@@ -148,7 +150,7 @@ impl<'db> CapturedItem<'db> {
                 }
             }
         }
-        if is_raw_identifier(&result, owner.module(db).krate().data(db).edition) {
+        if is_raw_identifier(&result, owner.module(db).krate(db).data(db).edition) {
             result.insert_str(0, "r#");
         }
         result
@@ -838,11 +840,12 @@ impl<'db> InferenceContext<'_, 'db> {
             for (i, p) in capture.place.projections.iter().enumerate() {
                 ty = p.projected_ty(
                     &self.table.infer_ctxt,
+                    self.table.param_env,
                     ty,
                     |_, _, _| {
                         unreachable!("Closure field only happens in MIR");
                     },
-                    self.owner.module(self.db).krate(),
+                    self.owner.module(self.db).krate(self.db),
                 );
                 if ty.is_raw_ptr() || ty.is_union() {
                     capture.kind = CaptureKind::ByRef(BorrowKind::Shared);

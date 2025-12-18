@@ -21,6 +21,7 @@ use tracing::instrument;
 
 use crate::core::build_steps::compile::{get_codegen_backend_file, normalize_codegen_backend_name};
 use crate::core::build_steps::doc::DocumentationFormat;
+use crate::core::build_steps::gcc::GccTargetPair;
 use crate::core::build_steps::tool::{
     self, RustcPrivateCompilers, ToolTargetBuildMode, get_tool_target_compiler,
 };
@@ -347,14 +348,14 @@ fn runtime_dll_dist(rust_root: &Path, target: TargetSelection, builder: &Builder
 
     let mut rustc_dlls = vec![];
     // windows-gnu and windows-gnullvm require different runtime libs
-    if target.ends_with("windows-gnu") {
+    if target.is_windows_gnu() {
         rustc_dlls.push("libwinpthread-1.dll");
         if target.starts_with("i686-") {
             rustc_dlls.push("libgcc_s_dw2-1.dll");
         } else {
             rustc_dlls.push("libgcc_s_seh-1.dll");
         }
-    } else if target.ends_with("windows-gnullvm") {
+    } else if target.is_windows_gnullvm() {
         rustc_dlls.push("libunwind.dll");
     } else {
         panic!("Vendoring of runtime DLLs for `{target}` is not supported`");
@@ -892,8 +893,8 @@ impl Step for Std {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustcDev {
     /// The compiler that will build rustc which will be shipped in this component.
-    build_compiler: Compiler,
-    target: TargetSelection,
+    pub build_compiler: Compiler,
+    pub target: TargetSelection,
 }
 
 impl RustcDev {
@@ -2856,8 +2857,9 @@ impl Step for Gcc {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let tarball = Tarball::new(builder, "gcc", &self.target.triple);
-        let output = builder.ensure(super::gcc::Gcc { target: self.target });
-        tarball.add_file(&output.libgccjit, "lib", FileType::NativeLibrary);
+        let output = builder
+            .ensure(super::gcc::Gcc { target_pair: GccTargetPair::for_native_build(self.target) });
+        tarball.add_file(output.libgccjit(), "lib", FileType::NativeLibrary);
         tarball.generate()
     }
 
