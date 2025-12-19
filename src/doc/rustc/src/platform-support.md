@@ -285,8 +285,8 @@ target | std | host | notes
 [`arm64e-apple-ios`](platform-support/arm64e-apple-ios.md) | ✓ | | ARM64e Apple iOS
 [`arm64e-apple-tvos`](platform-support/arm64e-apple-tvos.md)  | ✓ | | ARM64e Apple tvOS
 [`armeb-unknown-linux-gnueabi`](platform-support/armeb-unknown-linux-gnueabi.md) | ✓ | ? | Arm BE8 the default Arm big-endian architecture since [Armv6](https://developer.arm.com/documentation/101754/0616/armlink-Reference/armlink-Command-line-Options/--be8?lang=en).
-[`armebv7r-none-eabi`](platform-support/armebv7r-none-eabi.md) | * | Bare Armv7-R, Big Endian
-[`armebv7r-none-eabihf`](platform-support/armebv7r-none-eabi.md) | * | Bare Armv7-R, Big Endian, hardfloat
+[`armebv7r-none-eabi`](platform-support/armebv7r-none-eabi.md) | * | | Bare Armv7-R, Big Endian
+[`armebv7r-none-eabihf`](platform-support/armebv7r-none-eabi.md) | * | | Bare Armv7-R, Big Endian, hardfloat
 [`armv4t-none-eabi`](platform-support/armv4t-none-eabi.md) | * |  | Bare Armv4T
 `armv4t-unknown-linux-gnueabi` | ? |  | Armv4T Linux
 [`armv5te-none-eabi`](platform-support/armv5te-none-eabi.md) | * |  | Bare Armv5TE
