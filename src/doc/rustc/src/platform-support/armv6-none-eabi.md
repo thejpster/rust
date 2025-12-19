@@ -25,8 +25,8 @@ mode so there is no `thumbv6-none-eabihf` target.
 See [`arm-none-eabi`](arm-none-eabi.md) for information applicable to all
 `arm-none-eabi` targets.
 
-[`AtomicU8`](https://docs.rust-lang.org/stable/core/sync/atomic/struct.AtomicU8.html)
-[`AtomicI8`](https://docs.rust-lang.org/stable/core/sync/atomic/struct.AtomicI8.html)
+[`AtomicU8`]: https://docs.rust-lang.org/stable/core/sync/atomic/struct.AtomicU8.html
+[`AtomicI8`]: https://docs.rust-lang.org/stable/core/sync/atomic/struct.AtomicI8.html
 
 ## Target Maintainers
 
