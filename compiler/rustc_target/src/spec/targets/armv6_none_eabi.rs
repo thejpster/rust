@@ -21,6 +21,8 @@ pub(crate) fn target() -> Target {
             features: "+soft-float,+strict-align,+v6k".into(),
             atomic_cas: true,
             has_thumb_interworking: true,
+            // LDREXD/STREXD available as of ARMv6K
+            max_atomic_width: Some(64),
             ..base::arm_none::opts()
         },
     }
