@@ -17,7 +17,8 @@ instructions required to efficiently implement CAS on the [`AtomicU8`] and
 The `thumbv6-none-eabi` target is the same as this one, but the instruction set
 defaults to `Thumb`. Note that this target only supports the old Thumb-1
 instruction set, not the later Thumb-2 instruction set that was added in the
-Armv6T2 extension.
+Armv6T2 extension. Note that the Thumb-1 instruction set does not support
+atomics.
 
 The `armv6-none-eabihf` target uses the EABIHF hard-float ABI, and requires an
 FPU - it assumes a VFP2D16 FPU is present. The FPU is not available from Thumb
