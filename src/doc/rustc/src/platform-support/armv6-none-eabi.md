@@ -11,7 +11,8 @@ and in the Raspberry Pi Zero.
 
 This target assumes your processor has the Armv6K extensions, as basically all
 Armv6 processors do[^1]. The Armv6K extension adds the `LDREXB` and `STREXB`
-instructions required to implement CAS on the [`AtomicU8`] and [`AtomicI8`] types.
+instructions required to efficiently implement CAS on the [`AtomicU8`] and
+[`AtomicI8`] types.
 
 The `thumbv6-none-eabi` target is the same as this one, but the instruction set
 defaults to `Thumb`. Note that this target only supports the old Thumb-1
